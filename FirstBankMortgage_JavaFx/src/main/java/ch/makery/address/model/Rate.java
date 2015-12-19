@@ -1,23 +1,18 @@
 package ch.makery.address.model;
 
 import domain.RateDomainModel;
+import base.RateDAL;
+import org.apache.poi.ss.formula.functions.FinanceLib;
+
 
 public class Rate extends RateDomainModel {
 	
-	public double getPayment(int NumberOfPayments)
+	public static double getPayment(int creditscore, int loanamount, int years)
 	{
-		//FinalExam
-		//	Normally this kind of method would be in a BLL, but alas...
-		
-		//	Figure out payment based on:
-		//	Interest rate
-		//	PV
-		//	FV (make FV = 0, unless you want a balloon payment
-		//	Compounding = True
-		//	Number of Payments (passed in)
+		double interestrate = RateDAL.getRate(creditscore);
+		double monthlypayments = -1*FinanceLib.pmt(interestrate/1200, years*12, loanamount, 0, false);
 		
 		
-		
-		return 0;
+		return monthlypayments;
 	}
 }

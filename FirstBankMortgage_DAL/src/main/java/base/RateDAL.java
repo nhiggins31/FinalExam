@@ -16,13 +16,74 @@ import util.HibernateUtil;
 public class RateDAL {
 
 
-	public static double getRate(int GivenCreditScore) {
-		//FinalExam - please implement		
-		// Figure out which row makes sense- return back the 
-		// right interest rate from the table based on the given credit score
+	public static ArrayList<RateDomainModel> getRates() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction tx = null;	
+		ArrayList<RateDomainModel> rates = new ArrayList<RateDomainModel>();
 		
-		//FinalExam - obviously change the return value
-		return 0;
+		try {
+			tx = session.beginTransaction();	
+			
+			List rs = session.createQuery("FROM RateDomainModel").list();
+			for (Iterator iterator = rs.iterator(); iterator.hasNext();) {
+				RateDomainModel r = (RateDomainModel)iterator.next();
+				rates.add(r);
+			}
+			
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null)
+				tx.rollback();
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return rates;
+	}
+	
+	
+	public static double getRate(int GivenCreditScore) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction tx = null;
+		double rate = 0;
+		try {
+			tx = session.beginTransaction();
+			int credScore = GivenCreditScore;
+			if (credScore >= 800) {
+				credScore = 600;
+			}
+			else if (credScore >= 750) {
+				credScore = 750;
+			}
+			else if (credScore >= 700) {
+				credScore = 700;
+			}
+			else if (credScore >= 650) {
+				credScore = 650;
+			}
+			else if (credScore >= 600) {
+				credScore = 600;
+			}
+			else {
+				System.out.println("Interest rate for credit score: " +GivenCreditScore+ " does not exist in database. Rate is set to 5% by default.");
+				credScore = 600;
+			}
+			String sql = new String("Select InterestRate from RateDomainModel WHERE MINCREDITSCORE = " +credScore);
+			Query rateQuery = session.createQuery(sql);
+			List rates = rateQuery.list();
+			rate = (Double)rates.get(0);
+			tx.commit();
+			
+	}
+		catch (HibernateException e) {
+	if (tx != null)
+	tx.rollback();
+	e.printStackTrace();
+	} finally {
+	session.close();
+	}
+	return rate;
+
 	}
 
-}
+	}
